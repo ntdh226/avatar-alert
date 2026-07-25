@@ -1,40 +1,39 @@
 from playwright.sync_api import sync_playwright
+import requests
+import os
 
 URL = "https://worldcup.avatarqn.com/"
 
-def main():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True
-        )
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
-        page = browser.new_page(
-            viewport={"width": 1280, "height": 720}
-        )
 
-        print("Đang mở trang...")
+def send(msg):
+    requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+        data={
+            "chat_id": CHAT_ID,
+            "text": msg
+        }
+    )
 
-        page.goto(URL, wait_until="networkidle", timeout=60000)
 
-        # Chờ thêm vài giây cho JS tải xong
-        page.wait_for_timeout(5000)
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
 
-        print("=" * 80)
-        print("HTML SAU KHI JS CHẠY")
-        print("=" * 80)
+    page.goto(URL, wait_until="networkidle", timeout=60000)
+    page.wait_for_timeout(5000)
 
-        html = page.content()
+    text = page.locator("body").inner_text()
 
-        print(html)
+    browser.close()
 
-        print("=" * 80)
-        print("TEXT HIỂN THỊ")
-        print("=" * 80)
-
-        print(page.locator("body").inner_text())
-
-        browser.close()
-
+    if "Đã Kết Thúc" in text:
+        print("Chưa có trận.")
+    else:
+        print("Có trận mới!")
+        send("🚨 Avatar World Cup đã có trận mới!\nhttps://worldcup.avatarqn.com/")
 
 if __name__ == "__main__":
     main()
