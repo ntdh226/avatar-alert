@@ -1,36 +1,41 @@
-import requests
-from bs4 import BeautifulSoup
-import os
+from playwright.sync_api import sync_playwright
 
 URL = "https://worldcup.avatarqn.com/"
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
-
-r = requests.get(URL, timeout=20)
-html = r.text
-
-keyword = "Đã Kết Thúc"
-
-state_file = "state.txt"
-
-old = ""
-if os.path.exists(state_file):
-    with open(state_file, "r", encoding="utf-8") as f:
-        old = f.read()
-
-new = "closed" if keyword in html else "opened"
-
-if old != new:
-    with open(state_file, "w", encoding="utf-8") as f:
-        f.write(new)
-
-    if new == "opened":
-        text = "🎉 Avatar World Cup đã mở trận mới!"
-        requests.get(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            params={
-                "chat_id": CHAT_ID,
-                "text": text
-            }
+def main():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            headless=True
         )
+
+        page = browser.new_page(
+            viewport={"width": 1280, "height": 720}
+        )
+
+        print("Đang mở trang...")
+
+        page.goto(URL, wait_until="networkidle", timeout=60000)
+
+        # Chờ thêm vài giây cho JS tải xong
+        page.wait_for_timeout(5000)
+
+        print("=" * 80)
+        print("HTML SAU KHI JS CHẠY")
+        print("=" * 80)
+
+        html = page.content()
+
+        print(html)
+
+        print("=" * 80)
+        print("TEXT HIỂN THỊ")
+        print("=" * 80)
+
+        print(page.locator("body").inner_text())
+
+        browser.close()
+
+
+if __name__ == "__main__":
+    main()
+            
