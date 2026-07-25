@@ -35,6 +35,4 @@ with sync_playwright() as p:
         print("Có trận mới!")
         send("🚨 Avatar World Cup đã có trận mới!\nhttps://worldcup.avatarqn.com/")
 
-if __name__ == "__main__":
-    main()
             
