@@ -30,9 +30,7 @@ with sync_playwright() as p:
     browser.close()
 
     if "Đã Kết Thúc" in text:
-        print("Chưa có trận.")
-    else:
-        print("Có trận mới!")
-        send("🚨 Avatar World Cup đã có trận mới!\nhttps://worldcup.avatarqn.com/")
+        print("Đang test Telegram...")
+send("✅ Test thành công từ GitHub Actions")
 
             
